@@ -1,0 +1,131 @@
+{% extends 'Base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Calculadora - {{ recipe.name }}</h2>
+        <a href="{% url 'recipes' %}" class="btn btn-outline-secondary">
+          Voltar
+        </a>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle text-center">
+          <thead class="table-light">
+            <tr>
+              <th>Item</th>
+              <th>Qtd Receita (g/ml)</th>
+              <th>Preço por Kg/L (R$)</th>
+              <th>Custo por Receita (R$)</th>
+              <th>Qtd em Estoque (g/ml)</th>
+              <th>Receitas Possíveis</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in items %}
+            <tr 
+              class="recipe-item"
+              data-required="{{ item.required_quantity }}"
+              data-price="{{ item.price_per_kg }}"
+              data-available="{{ item.available_quantity }}"
+            >
+              <td>{{ item.name }}</td>
+
+              <td>
+                <input type="number"
+                       class="form-control required-input"
+                       value="{{ item.required_quantity }}"
+                       min="1"
+                       step="0.01">
+                <div class="form-text text-muted">
+                  Usado na receita
+                </div>
+              </td>
+
+              <td>R$ {{ item.price_per_kg }}</td>
+
+              <td class="item-cost fw-bold text-success">
+                --
+              </td>
+
+              <td>{{ item.available_quantity }}</td>
+
+              <td class="possible-recipes fw-bold">
+                --
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <hr>
+
+      <div class="row">
+        <div class="col-md-6">
+          <h5 class="fw-bold">Custo Total da Receita:</h5>
+          <h3 class="text-success">R$ <span id="total-cost">0.00</span></h3>
+        </div>
+
+        <div class="col-md-6 text-end">
+          <h5 class="fw-bold">Receitas Possíveis (limitante):</h5>
+          <h3 class="text-primary"><span id="min-recipes">0</span></h3>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const rows = document.querySelectorAll(".recipe-item");
+  const totalCostElement = document.getElementById("total-cost");
+  const minRecipesElement = document.getElementById("min-recipes");
+
+  function calculate() {
+    let totalCost = 0;
+    let minRecipes = Infinity;
+
+    rows.forEach(row => {
+      const requiredInput = row.querySelector(".required-input");
+      const required = parseFloat(requiredInput.value);
+      const pricePerKg = parseFloat(row.dataset.price);
+      const available = parseFloat(row.dataset.available);
+
+      if (required > 0 && pricePerKg >= 0) {
+
+        // custo por receita do item
+        const cost = (required / 1000) * pricePerKg;
+        totalCost += cost;
+
+        row.querySelector(".item-cost").innerText = 
+          "R$ " + cost.toFixed(2);
+
+        // receitas possíveis com base no estoque
+        const possible = Math.floor(available / required);
+
+        row.querySelector(".possible-recipes").innerText = possible;
+
+        if (possible < minRecipes) {
+          minRecipes = possible;
+        }
+
+      }
+    });
+
+    totalCostElement.innerText = totalCost.toFixed(2);
+    minRecipesElement.innerText = 
+      minRecipes === Infinity ? 0 : minRecipes;
+  }
+
+  document.querySelectorAll(".required-input").forEach(input => {
+    input.addEventListener("input", calculate);
+  });
+
+  calculate();
+</script>
+
+{% endblock %}

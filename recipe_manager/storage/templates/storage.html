@@ -1,0 +1,179 @@
+{% extends 'Base.html' %} {% block content %}
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="fw-bold mb-0">Items</h2>
+      <a href="{% url 'add_item' %}" class="btn btn-success">
+        + Adicionar Item
+      </a>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>Nome</th>
+            <th>Quantidade</th>
+            <th>Preço/Kg</th>
+            <th class="text-end"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in object_list %}
+          <tr>
+            <td class="fs-5">{{ item.name }}</td>
+            <td>{{ item.quantity|floatformat:1 }}</td>
+            <td>{{ item.price|floatformat:2 }}</td>
+            <td class="text-end">
+              <button
+                class="btn btn-outline-primary btn-sm edit-btn"
+                data-id="{{ item.id }}"
+                data-name="{{ item.name }}"
+                data-quantity="{{ item.quantity }}"
+                data-price="{{ item.price }}"
+                data-bs-toggle="modal"
+                data-bs-target="#editModal"
+              >
+                Editar
+              </button>
+
+              <a href="{% url 'delete_item' item.id %}" class="btn btn-outline-danger btn-sm"> Excluir </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL ================= -->
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" id="editForm">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Item</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+          ></button>
+        </div>
+
+        <div class="modal-body">
+          <input type="hidden" name="item_id" id="edit-id" />
+
+          <div class="mb-3">
+            <label class="form-label">Nome</label>
+            <input
+              type="text"
+              name="name"
+              id="edit-name"
+              class="form-control"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Quantidade (g/ml)</label>
+            <input
+              type="number"
+              step="0.01"
+              name="quantity"
+              id="edit-quantity"
+              class="form-control"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Preço Pago (R$)</label>
+            <input
+              type="number"
+              step="0.01"
+              name="price"
+              id="edit-paid-price"
+              class="form-control"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Preço por Kg/L (R$)</label>
+            <input
+              type="number"
+              step="0.01"
+              id="edit-price"
+              class="form-control"
+              readonly
+              required
+            />
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary">
+            Salvar Alterações
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  const editButtons = document.querySelectorAll(".edit-btn");
+  const editId = document.getElementById("edit-id");
+  const editName = document.getElementById("edit-name");
+  const editQuantity = document.getElementById("edit-quantity");
+  const editPaidPrice = document.getElementById("edit-paid-price");
+  const editPrice = document.getElementById("edit-price");
+  const editForm = document.getElementById("editForm");
+
+  editButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const id = button.getAttribute("data-id");
+      const name = button.getAttribute("data-name");
+      const quantity = button.getAttribute("data-quantity");
+      const pricePerKg = button.getAttribute("data-price");
+
+      editId.value = id;
+      editName.value = name;
+      editQuantity.value = quantity;
+
+      // recalcular preço pago baseado no preço/kg
+      const paidPrice = (pricePerKg / 1000) * quantity;
+      editPaidPrice.value = parseFloat(paidPrice).toFixed(2);
+      editPrice.value = pricePerKg;
+
+      editForm.action = `/storage/edit-item/${id}/`;
+    });
+  });
+
+  function calculateEditPrice() {
+    const quantity = parseFloat(editQuantity.value);
+    const paidPrice = parseFloat(editPaidPrice.value);
+
+    if (quantity > 0 && paidPrice >= 0) {
+      const pricePerKg = (paidPrice / quantity) * 1000;
+      editPrice.value = pricePerKg.toFixed(2);
+    } else {
+      editPrice.value = "";
+    }
+  }
+
+  editQuantity.addEventListener("input", calculateEditPrice);
+  editPaidPrice.addEventListener("input", calculateEditPrice);
+</script>
+
+{% endblock %}

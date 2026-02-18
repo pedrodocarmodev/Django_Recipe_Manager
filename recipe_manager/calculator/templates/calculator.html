@@ -1,0 +1,86 @@
+{% extends 'Base.html' %} {% block content %}
+
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Calculadora</h2>
+        <a href="{% url 'recipes' %}" class="btn btn-outline-secondary">
+          Voltar
+        </a>
+      </div>
+
+      <!-- ========================= -->
+      <!-- CALCULADORA DE CUSTO -->
+      <!-- ========================= -->
+
+      <div class="mb-4">
+        <label class="form-label fw-semibold">
+          Calcular Custo da Receita
+        </label>
+
+        <select id="recipe-select" class="form-select">
+          <option value="" selected disabled>
+            Escolha uma receita...
+          </option>
+
+          {% for recipe in recipes %}
+            <option value="{{ recipe.id }}">
+              {{ recipe.name }}
+            </option>
+          {% empty %}
+            <option disabled>
+              Nenhuma receita cadastrada
+            </option>
+          {% endfor %}
+        </select>
+
+        <div class="form-text">
+          Você será redirecionado para o cálculo detalhado da receita.
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <!-- ========================= -->
+      <!-- FUTURA CALCULADORA DE LUCRO -->
+      <!-- ========================= -->
+
+      <div class="mb-3">
+        <h5 class="fw-semibold">Calculadora de Lucro</h5>
+
+        <p class="text-muted mb-3">
+          Calcule lucro com base no custo da receita, quantidade produzida,
+          outros custos e preço de venda por unidade.
+        </p>
+
+        <!-- BOTÃO FUTURO -->
+        <a href="" class="btn btn-primary">
+          Ir para Calculadora de Lucro
+        </a>
+
+        <div class="form-text">
+          (Em breve disponível)
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+  const select = document.getElementById("recipe-select");
+
+  select.addEventListener("change", function () {
+    const recipeId = this.value;
+
+    if (recipeId) {
+      window.location.href = `/calculator/${recipeId}`;
+    }
+  });
+</script>
+
+{% endblock %}

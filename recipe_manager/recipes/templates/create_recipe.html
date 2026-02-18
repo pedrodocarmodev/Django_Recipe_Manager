@@ -1,0 +1,119 @@
+{% extends 'Base.html' %}
+{% block content %}
+
+<div class="card shadow-sm">
+  <div class="card-body">
+
+    <h2 class="fw-bold mb-4">Criar Receita</h2>
+
+    <form method="POST">
+      {% csrf_token %}
+
+      <!-- Nome -->
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label class="form-label">Nome da Receita</label>
+          <input type="text"
+                 name="recipe_name"
+                 class="form-control"
+                 required>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Quantidade por Receita</label>
+          <input type="number"
+                 step="0.01"
+                 name="recipe_quantity"
+                 class="form-control"
+                 required>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">Ingredientes</h5>
+        <button type="button"
+                id="add-ingredient"
+                class="btn btn-outline-primary btn-sm">
+          + Adicionar
+        </button>
+      </div>
+
+      <div id="ingredients-container">
+
+        <div class="row mb-3 ingredient-row g-3">
+
+          <div class="col-md-5">
+            <label class="form-label">Item</label>
+            <input type="text"
+                   name="item_name[]"
+                   class="form-control"
+                   list="storage-items"
+                   placeholder="Digite ou selecione"
+                   required>
+
+            <datalist id="storage-items">
+              {% for item in storage_items %}
+              <option value="{{ item.name }}"></option>
+              {% endfor %}
+            </datalist>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Quantidade</label>
+            <input type="number"
+                   step="0.01"
+                   name="quantity[]"
+                   class="form-control"
+                   required>
+          </div>
+
+          <div class="col-md-3 d-flex align-items-end">
+            <button type="button"
+                    class="btn btn-outline-danger w-100 remove-btn">
+              Remover
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+      <hr class="my-4">
+
+      <div class="d-flex justify-content-end">
+        <button type="submit"
+                class="btn btn-success px-4">
+          Criar Receita
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+</div>
+
+<script>
+document.getElementById("add-ingredient")
+  .addEventListener("click", function () {
+    const container = document.getElementById("ingredients-container");
+    const firstRow = document.querySelector(".ingredient-row");
+    const newRow = firstRow.cloneNode(true);
+
+    newRow.querySelectorAll("input").forEach(input => input.value = "");
+
+    container.prepend(newRow);
+  });
+
+document.addEventListener("click", function (e) {
+  if (e.target.classList.contains("remove-btn")) {
+    const rows = document.querySelectorAll(".ingredient-row");
+    if (rows.length > 1) {
+      e.target.closest(".ingredient-row").remove();
+    }
+  }
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends 'Base.html' %} {% block content %}
+
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Adicionar Item</h2>
+        <a href="{% url 'storage' %}" class="btn btn-outline-secondary">
+          Voltar
+        </a>
+      </div>
+
+      <form action="" method="POST">
+        {% csrf_token %}
+
+        <!-- Nome -->
+        <div class="mb-3">
+          <label class="form-label">Nome do Item</label>
+          <input type="text" name="name" class="form-control" required />
+        </div>
+
+        <!-- Quantidade Base -->
+        <div class="mb-3">
+          <label class="form-label">Quantidade (g ou ml)</label>
+          <input
+            type="number"
+            step="0.01"
+            min="1"
+            id="quantity"
+            name="quantity"
+            class="form-control"
+            required
+          />
+          <div class="form-text">Sempre informe em gramas ou mililitros.</div>
+        </div>
+
+        <!-- Preço Pago -->
+        <div class="mb-3">
+          <label class="form-label">Preço Pago (R$)</label>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            id="paid_price"
+            class="form-control"
+            required
+          />
+        </div>
+
+        <!-- Preço Calculado -->
+        <div class="mb-3">
+          <label class="form-label">Preço por Kg/L (R$)</label>
+          <input
+            type="number"
+            step="0.01"
+            id="price_per_kg"
+            name="price"
+            class="form-control"
+            readonly
+            required
+          />
+          <div class="form-text">Este valor será salvo no banco.</div>
+        </div>
+
+        <button type="submit" class="btn btn-success">Salvar Item</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  const quantityInput = document.getElementById("quantity");
+  const paidPriceInput = document.getElementById("paid_price");
+  const pricePerKgInput = document.getElementById("price_per_kg");
+
+  function calculatePricePerKg() {
+    const quantity = parseFloat(quantityInput.value);
+    const paidPrice = parseFloat(paidPriceInput.value);
+
+    if (quantity > 0 && paidPrice >= 0) {
+      const pricePerKg = (paidPrice / quantity) * 1000;
+      pricePerKgInput.value = pricePerKg.toFixed(2);
+    } else {
+      pricePerKgInput.value = "";
+    }
+  }
+
+  quantityInput.addEventListener("input", calculatePricePerKg);
+  paidPriceInput.addEventListener("input", calculatePricePerKg);
+</script>
+
+{% endblock %}

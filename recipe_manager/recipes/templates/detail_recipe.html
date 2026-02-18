@@ -1,0 +1,50 @@
+{% extends 'Base.html' %}
+{% block content %}
+
+<div class="card shadow-sm">
+  <div class="card-body">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="fw-bold mb-0">{{ recipe.name }}</h2>
+      <div>
+        <a href="{% url 'recipe_edit' recipe.pk %}" class="btn btn-outline-primary btn-sm">
+          Editar
+        </a>
+        <a href="{% url 'recipe_delete' recipe.pk %}" class="btn btn-outline-danger btn-sm">
+          Excluir
+        </a>
+      </div>
+    </div>
+
+    <hr>
+
+    <h5 class="mb-3">Ingredientes</h5>
+
+    <div class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>Item</th>
+            <th>Quantidade</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ingredient in recipe.recipeingredient_set.all %}
+          <tr>
+            <td>{{ ingredient.item.name }}</td>
+            <td>
+              <span class="badge bg-secondary">
+                {{ ingredient.used_quantity }}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
