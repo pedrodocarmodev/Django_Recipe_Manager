@@ -34,8 +34,7 @@ def EditItemView(request, id):
 
         if request.POST.get('price'):
             paid_price = float(request.POST.get('price'))
-            price = ( paid_price / quantity ) * 1000
-            item.price = price
+            item.price = paid_price
 
         item.name = name
         item.save()        

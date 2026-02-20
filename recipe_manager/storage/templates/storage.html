@@ -89,15 +89,28 @@
             />
           </div>
 
+          <hr />
+          <h6 class="fw-semibold">Recalcular Preço (opcional)</h6>
+
           <div class="mb-3">
-            <label class="form-label">Preço Pago (R$)</label>
+            <label class="form-label">Eu paguei (R$)</label>
             <input
               type="number"
               step="0.01"
-              name="price"
+              min="0"
               id="edit-paid-price"
               class="form-control"
-              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Por quantos g/ml?</label>
+            <input
+              type="number"
+              step="0.01"
+              min="0.01"
+              id="edit-purchase-quantity"
+              class="form-control"
             />
           </div>
 
@@ -106,13 +119,12 @@
             <input
               type="number"
               step="0.01"
+              name="price"
               id="edit-price"
               class="form-control"
-              readonly
               required
             />
           </div>
-        </div>
 
         <div class="modal-footer">
           <button
@@ -136,7 +148,9 @@
   const editId = document.getElementById("edit-id");
   const editName = document.getElementById("edit-name");
   const editQuantity = document.getElementById("edit-quantity");
+
   const editPaidPrice = document.getElementById("edit-paid-price");
+  const editPurchaseQuantity = document.getElementById("edit-purchase-quantity");
   const editPrice = document.getElementById("edit-price");
   const editForm = document.getElementById("editForm");
 
@@ -151,29 +165,29 @@
       editName.value = name;
       editQuantity.value = quantity;
 
-      // recalcular preço pago baseado no preço/kg
-      const paidPrice = (pricePerKg / 1000) * quantity;
-      editPaidPrice.value = parseFloat(paidPrice).toFixed(2);
-      editPrice.value = pricePerKg;
+      // apenas mostrar o preço atual salvo
+      editPrice.value = parseFloat(pricePerKg).toFixed(2);
+
+      // limpar campos auxiliares
+      editPaidPrice.value = "";
+      editPurchaseQuantity.value = "";
 
       editForm.action = `/storage/edit-item/${id}/`;
     });
   });
 
   function calculateEditPrice() {
-    const quantity = parseFloat(editQuantity.value);
     const paidPrice = parseFloat(editPaidPrice.value);
+    const purchaseQuantity = parseFloat(editPurchaseQuantity.value);
 
-    if (quantity > 0 && paidPrice >= 0) {
-      const pricePerKg = (paidPrice / quantity) * 1000;
+    if (purchaseQuantity > 0 && paidPrice >= 0) {
+      const pricePerKg = (paidPrice / purchaseQuantity) * 1000;
       editPrice.value = pricePerKg.toFixed(2);
-    } else {
-      editPrice.value = "";
     }
   }
 
-  editQuantity.addEventListener("input", calculateEditPrice);
   editPaidPrice.addEventListener("input", calculateEditPrice);
+  editPurchaseQuantity.addEventListener("input", calculateEditPrice);
 </script>
 
 {% endblock %}

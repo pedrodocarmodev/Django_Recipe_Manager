@@ -4,38 +4,55 @@
 <div class="card shadow-sm">
   <div class="card-body">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
       <h2 class="fw-bold mb-0">{{ recipe.name }}</h2>
-      <div>
-        <a href="{% url 'recipe_edit' recipe.pk %}" class="btn btn-outline-primary btn-sm">
-          Editar
-        </a>
-        <a href="{% url 'recipe_delete' recipe.pk %}" class="btn btn-outline-danger btn-sm">
-          Excluir
-        </a>
-      </div>
+
+      <button class="btn btn-success"
+              data-bs-toggle="modal"
+              data-bs-target="#addModal">
+        + Adicionar Item
+      </button>
     </div>
 
-    <hr>
-
-    <h5 class="mb-3">Ingredientes</h5>
-
     <div class="table-responsive">
-      <table class="table table-striped align-middle">
+      <table class="table table-hover align-middle">
         <thead class="table-dark">
           <tr>
             <th>Item</th>
             <th>Quantidade</th>
+            <th class="text-end"></th>
           </tr>
         </thead>
         <tbody>
           {% for ingredient in recipe.recipeingredient_set.all %}
           <tr>
-            <td>{{ ingredient.item.name }}</td>
+            <td class="fs-5">{{ ingredient.item.name }}</td>
+
             <td>
-              <span class="badge bg-secondary">
-                {{ ingredient.used_quantity }}
+              <span>
+                {{ ingredient.used_quantity|floatformat:1 }}
               </span>
+            </td>
+
+            <td class="text-end">
+
+              <!-- EDITAR -->
+              <button
+                class="btn btn-outline-primary btn-sm edit-btn"
+                data-id="{{ ingredient.id }}"
+                data-item="{{ ingredient.item.name }}"
+                data-quantity="{{ ingredient.used_quantity }}"
+                data-bs-toggle="modal"
+                data-bs-target="#editModal">
+                Editar
+              </button>
+
+              <!-- EXCLUIR -->
+              <a href="{% url 'remove_recipe_item' ingredient.id %}"
+                 class="btn btn-outline-danger btn-sm">
+                Excluir
+              </a>
+
             </td>
           </tr>
           {% endfor %}
@@ -46,5 +63,148 @@
   </div>
 </div>
 
-{% endblock %}
+<!-- ================= MODAL EDITAR ================= -->
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
 
+      <form method="POST" id="editForm">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Quantidade</h5>
+          <button type="button" class="btn-close"
+                  data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+
+          <input type="hidden" name="ingredient_id" id="edit-id">
+
+          <div class="mb-3">
+            <label class="form-label">Item</label>
+            <input type="text"
+                   id="edit-item"
+                   class="form-control"
+                   disabled>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Quantidade (g/ml)</label>
+            <input type="number"
+                   step="0.01"
+                   name="used_quantity"
+                   id="edit-quantity"
+                   class="form-control"
+                   required>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal">
+            Cancelar
+          </button>
+
+          <button type="submit"
+                  class="btn btn-primary">
+            Salvar
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- ================= MODAL ADICIONAR ================= -->
+<div class="modal fade" id="addModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <form method="POST" action="{% url 'add_recipe_item' recipe.id %}">
+        {% csrf_token %}
+
+        <div class="modal-header">
+          <h5 class="modal-title">Adicionar Item</h5>
+          <button type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+
+          <div class="mb-3">
+            <label class="form-label">Item</label>
+            <select name="item_id"
+                    class="form-select"
+                    required>
+              {% for item in items %}
+                <option value="{{ item.id }}">
+                  {{ item.name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Quantidade (g/ml)</label>
+            <input type="number"
+                   step="0.01"
+                   name="used_quantity"
+                   class="form-control"
+                   required>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal">
+            Cancelar
+          </button>
+
+          <button type="submit"
+                  class="btn btn-success">
+            Adicionar
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- ================= SCRIPT ================= -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const editButtons = document.querySelectorAll(".edit-btn");
+
+  editButtons.forEach(button => {
+    button.addEventListener("click", function () {
+
+      document.getElementById("edit-id").value =
+        this.dataset.id;
+
+      document.getElementById("edit-item").value =
+        this.dataset.item;
+
+      document.getElementById("edit-quantity").value =
+        this.dataset.quantity;
+
+      // Ajuste aqui para sua URL de update
+      document.getElementById("editForm").action =
+        `/recipes/ingredient/${this.dataset.id}/edit/`;
+
+    });
+  });
+
+});
+</script>
+
+{% endblock %}

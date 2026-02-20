@@ -44,20 +44,21 @@
 
         <div class="row mb-3 ingredient-row g-3">
 
+          <!-- SELECT REAL -->
           <div class="col-md-5">
             <label class="form-label">Item</label>
-            <input type="text"
-                   name="item_name[]"
-                   class="form-control"
-                   list="storage-items"
-                   placeholder="Digite ou selecione"
-                   required>
-
-            <datalist id="storage-items">
+            <select name="item_id[]"
+                    class="form-select"
+                    required>
+              <option value="" selected disabled>
+                Selecione um item
+              </option>
               {% for item in storage_items %}
-              <option value="{{ item.name }}"></option>
+                <option value="{{ item.id }}">
+                  {{ item.name }}
+                </option>
               {% endfor %}
-            </datalist>
+            </select>
           </div>
 
           <div class="col-md-4">
@@ -97,13 +98,16 @@
 <script>
 document.getElementById("add-ingredient")
   .addEventListener("click", function () {
+
     const container = document.getElementById("ingredients-container");
     const firstRow = document.querySelector(".ingredient-row");
     const newRow = firstRow.cloneNode(true);
 
+    // limpa valores
     newRow.querySelectorAll("input").forEach(input => input.value = "");
+    newRow.querySelectorAll("select").forEach(select => select.selectedIndex = 0);
 
-    container.prepend(newRow);
+    container.appendChild(newRow);
   });
 
 document.addEventListener("click", function (e) {
